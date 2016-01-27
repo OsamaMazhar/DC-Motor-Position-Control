@@ -41,13 +41,13 @@ void main()
 	 unsigned char dt;
 	 float Ki, Kp, I, Prop, D, Kd, error, setpoint, PWM;
 	 Status = 0;
-	 KEYPAD = 0xF0;											// make higher bits of keypad port that is column bits input and low row bits outputs
+	 KEYPAD = 0xF0;					// make higher bits of keypad port that is column bits input and low row bits outputs
 	 P2 = 0x00;
 	 Clock = 0;
-	 lcdcmd(0x38);											// 2 lines and 5X7 matrix
-	 lcdcmd(0x0C);											// Display ON, Cursor Blinking = 0x0E But this command is Display ON, Cursor OFF
-	 lcdcmd(0x01);											// Clear Display Screen
-	 lcdcmd(0x80);											// Force Cursor to the beginning of the First Line
+	 lcdcmd(0x38);					// 2 lines and 5X7 matrix
+	 lcdcmd(0x0C);					// Display ON, Cursor Blinking = 0x0E But this command is Display ON, Cursor OFF
+	 lcdcmd(0x01);					// Clear Display Screen
+	 lcdcmd(0x80);					// Force Cursor to the beginning of the First Line
 	 lcdcmd(0x06);
 	 IE = 0x81;
 	 TCON = 0x01;
@@ -58,7 +58,7 @@ void main()
 	 Kp = 5;
 	 Kd = 1;
 	 error = 0;
-	 while(1)														//2 MC
+	 while(1)					//2 MC
 		{
 		 actual_position = cnt;
 		 previous_error = error;
@@ -95,13 +95,13 @@ void main()
 		 D = Kd * (error - previous_error) / dt;
 
 
-		 lcdcmd(0xC0);								// for development purposes
-		 inttoLCD(PWM); 							// same
-		 inttoLCD(cnt);								// same
+		 lcdcmd(0xC0);				// for development purposes
+		 inttoLCD(PWM); 			// same
+		 inttoLCD(cnt);				// same
 		 PWM = Prop + I + D;
 		 if(PWM > 255)
 		 	PWM = 255;
-		 P2 = PWM;										// transfering the value of PWM to other controller
+		 P2 = PWM;				// transfering the value of PWM to other controller
 		 
 		}							
 
@@ -113,7 +113,7 @@ Stop: lcdcmd(0xC0);
 	  inttoLCD(Prop); 
 	  P2 = 0;
 	  while(1);
-	}																// main braces
+	}						// main braces
 
 unsigned int GetInput()
 	{
@@ -124,7 +124,7 @@ unsigned int GetInput()
 		{
 Re:		 Key[cnt] = KeypadRead();
 		 L = Key[cnt];
-		 if(L == '+' | L == '-')		  // my beloved sryinge pump routine to re-enter data if mistakenly entered wrong
+		 if(L == '+' | L == '-')		// my beloved sryinge pump routine to re-enter data if mistakenly entered wrong
 		 	goto Re;
 		 if(L == '=')
 		 	continue;
@@ -169,14 +169,14 @@ void inttoLCD(unsigned int value)
 	{
 	 unsigned int x, y, z, d[5];
 	 char l;
-	 x = value / 10; 											// => 6553
+	 x = value / 10; 							// => 6553
 	 d[0] = (value % 10) + 48; 						// => 6 (LSD) *
-	 d[1] = (x % 10) + 48;	 							// => 3 *
-	 y = x / 10; 													// => 655
-	 d[2] = (y % 10) + 48; 								// => 5 *
-	 z = y / 10; 													// => 65
-	 d[3] = (z % 10) + 48;								// => 5 *
-	 d[4] = (z / 10) + 48;								// => 6 (MSD) *
+	 d[1] = (x % 10) + 48;	 						// => 3 *
+	 y = x / 10; 								// => 655
+	 d[2] = (y % 10) + 48; 							// => 5 *
+	 z = y / 10; 								// => 65
+	 d[3] = (z % 10) + 48;							// => 5 *
+	 d[4] = (z / 10) + 48;							// => 6 (MSD) *
 	 if(d[4] == 48 & d[3] == 48 & d[2] == 48 & d[1] == 48)
 		{
 		  lcddata(d[0]);
@@ -224,12 +224,12 @@ void MSDelay(unsigned int count)
 
 void lcdready()
 	{														
-		busy = 1;	  										// make the busy pin an input
+		busy = 1;	  				// make the busy pin an input
 		rs = 0;
 		rw = 1;
-		while(busy == 1)								// wait here for busy flag
+		while(busy == 1)				// wait here for busy flag
 			{
-				en = 0;										  // strobe the enable pin
+				en = 0;				// strobe the enable pin
 				MSDelay(1);
 				en = 1;
 			}
@@ -266,73 +266,73 @@ unsigned char KeypadRead()
 		unsigned char colloc, rowloc; 		
 		do
 		   {												
-		   KEYPAD = 0xF0;									// ground all rows at once
-		   colloc = KEYPAD;								// read the port for columns
-		   colloc &= 0xF0;								// mask row bits
+		   KEYPAD = 0xF0;					// ground all rows at once
+		   colloc = KEYPAD;					// read the port for columns
+		   colloc &= 0xF0;					// mask row bits
 		   }
-		while(colloc != 0xF0);						// check until all keys are released
+		while(colloc != 0xF0);					// check until all keys are released
 		
 		do
 		   {
 		  	 do
 		   		{
-				MSDelay(8);  									// call delay
-				colloc = KEYPAD;							// see if any key is pressed
-				colloc &= 0xF0;								// mask unsused bits
+				MSDelay(8);  				// call delay
+				colloc = KEYPAD;			// see if any key is pressed
+				colloc &= 0xF0;				// mask unsused bits
 				}
-		 	 while(colloc == 0xF0);					// keep checking for keypress
+		 	 while(colloc == 0xF0);				// keep checking for keypress
 
-			MSDelay(8);											// call delay for debounce
-			colloc = KEYPAD;								// read columns
-			colloc &= 0xF0;									// mask unused bits
+			MSDelay(8);					// call delay for debounce
+			colloc = KEYPAD;				// read columns
+			colloc &= 0xF0;					// mask unused bits
 			}
-			while(colloc == 0xF0);					// wait for keypress
+			while(colloc == 0xF0);				// wait for keypress
 
 			while(1)
 				{
-					KEYPAD &= 0xF0;							// masking row bits
-					KEYPAD |= 0x0E;							// now ground row 0 0E = 00001110b ORing won't affect column data
-					colloc = KEYPAD;						// read columns
-					colloc &= 0xF0;							// mask row bits
-					if(colloc != 0xF0)					// column detected
+					KEYPAD &= 0xF0;			// masking row bits
+					KEYPAD |= 0x0E;			// now ground row 0 0E = 00001110b ORing won't affect column data
+					colloc = KEYPAD;		// read columns
+					colloc &= 0xF0;			// mask row bits
+					if(colloc != 0xF0)		// column detected
 						{
-							rowloc = 0;							// save row location
+							rowloc = 0;	// save row location
 							break;
 						}
 					KEYPAD &= 0xF0;
-					KEYPAD |= 0x0D;							// ground row 1 0D = 00001101b  ORing won't affect column data
-					colloc = KEYPAD;						// read columns
-					colloc &= 0xF0;							// mask row bits
-					if(colloc != 0xF0)					// column detected
+					KEYPAD |= 0x0D;			// ground row 1 0D = 00001101b  ORing won't affect column data
+					colloc = KEYPAD;		// read columns
+					colloc &= 0xF0;			// mask row bits
+					if(colloc != 0xF0)		// column detected
 						{
-							rowloc = 1;							// save row location
+							rowloc = 1;	// save row location
 							break;
 						}
 					KEYPAD &= 0XF0;
-					KEYPAD |= 0x0B;							// ground row 2 0B = 00001011b
-					colloc = KEYPAD;						// read columns
-					colloc &= 0xF0;							// mask row bits
-					if(colloc != 0xF0)					// column detected
+					KEYPAD |= 0x0B;			// ground row 2 0B = 00001011b
+					colloc = KEYPAD;		// read columns
+					colloc &= 0xF0;			// mask row bits
+					if(colloc != 0xF0)		// column detected
 						{
-							rowloc = 2;							// save row location
+							rowloc = 2;	// save row location
 							break;
 						}
 					KEYPAD &= 0XF0;
-					KEYPAD |= 0x07;							// ground row 3 07 = 00000111b
-					colloc = KEYPAD;						// read columns
-					colloc &= 0xF0;							// mask row bits
-					if(colloc != 0xF0)					// column detected
-					rowloc = 3;									// save row location
+					KEYPAD |= 0x07;			// ground row 3 07 = 00000111b
+					colloc = KEYPAD;		// read columns
+					colloc &= 0xF0;			// mask row bits
+					if(colloc != 0xF0)		// column detected
+					rowloc = 3;			// save row location
 					break;
 				}
 				
 		// check columns and send result to LCD
 				
-		if(colloc == 0xE0)								//0E = 00001110
+		if(colloc == 0xE0)					//0E = 00001110
 			return keypad[rowloc][0];
-		else if(colloc == 0xD0)						//0D = 00001101
+		else if(colloc == 0xD0)					//0D = 00001101
 			return keypad[rowloc][1];
-		else if(colloc == 0xB0)						//0B = 00001011
+		else if(colloc == 0xB0)					//0B = 00001011
 			return keypad[rowloc][2];
 		else
 			return keypad[rowloc][3];
